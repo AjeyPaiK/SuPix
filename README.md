@@ -1,2 +1,2 @@
 # SuPix
-A self-supervised representation learning model for biopsy images using super-pixel inpainting.
+A self-supervised representation learning model for biopsy images using super-pixel inpainting. In this method, we design novel composite pretext tasks for targeted inpainting and elastic deformations. A fully supervised model is initially trained on a small number of labeled data. This model is used to generate psuedo-labels for important anatomical regions in unlabeled biopsy images. Some of these regions are randomly masked and the entire image is deformed using elastic deformation as mentioned in [this paper.](http://cognitivemedium.com/assets/rmnist/Simard.pdf)
