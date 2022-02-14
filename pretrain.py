@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, CSVLogger
-from utils import SSIMLoss
+from utilities.utils import SSIMLoss
 
 tf.random.set_seed(100)
 np.random.seed(100)

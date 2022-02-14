@@ -1,5 +1,5 @@
 """Display outputs of SSL"""
-from utils import *
+from utilities.utils import *
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf

@@ -1,10 +1,10 @@
 from PIL import Image
-from utils import draw_boxes
+from utilities.utils import draw_boxes
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend as K
-from tensorflow.keras.losses import binary_crossentropy, cosine_similarity, mean_squared_error
-from utils import gradient_edges
+from tensorflow.keras.losses import binary_crossentropy, cosine_similarity
+from utilities.utils import gradient_edges
 
 smooth = 1.
 

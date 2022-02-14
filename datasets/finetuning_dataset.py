@@ -5,7 +5,7 @@ import time
 
 from PIL import ImageEnhance, ImageFilter
 from tensorflow.keras.utils import Sequence
-from utils import *
+from utilities.utils import *
 
 # NOTE: IMAGE CONVENTION IS (W, H, C)
 
