@@ -1,13 +1,13 @@
-from PIL import Image, ImageDraw, ImageEnhance
+from PIL import Image, ImageEnhance
 from tensorflow.keras.utils import Sequence
 import os
 import random
 import cv2
 import numpy as np
 from skimage.segmentation import slic
-import matplotlib.pyplot as plt
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
+
 
 class DataGenerator(Sequence):
     def __init__(self, folder_path, image_size, batch_size=4, augment=True):
@@ -23,7 +23,7 @@ class DataGenerator(Sequence):
         self.image_ids = [f.replace('.jpg', '') for f in image_paths]
         self.batch_size = batch_size
         self.augment = augment
-        print("Image count in {} path: {}".format(self.folder_path,len(self.image_ids)))
+        print("Image count in {} path: {}".format(self.folder_path, len(self.image_ids)))
         self.on_epoch_end()
 
     def on_epoch_end(self):
@@ -48,7 +48,8 @@ class DataGenerator(Sequence):
             img = img.resize((self.image_size[0], self.image_size[1]))
         return img
 
-    def augment_instance(self, img, flip_hor=None, flip_ver=None, rotate_90=None, brightness_factor=None, contrast_factor=None):
+    def augment_instance(self, img, flip_hor=None, flip_ver=None, rotate_90=None, brightness_factor=None,
+                         contrast_factor=None):
         """
         Args:
             PIL img
@@ -73,14 +74,14 @@ class DataGenerator(Sequence):
         # Flip left-right
         if flip_hor == 1:
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        
+
         # Flip top-bottom
         if flip_ver == 1:
             img = img.transpose(Image.FLIP_TOP_BOTTOM)
-        
+
         # rotate 90 degrees anticlock
         if rotate_90 >= 1:
-            img = img.rotate(90, expand = True)
+            img = img.rotate(90, expand=True)
             # Now image is in portrait shape, We need landscape window from it
             w_new, h_new = img.size
             w_crop = h
@@ -98,7 +99,7 @@ class DataGenerator(Sequence):
             img = brighten.enhance(brightness_factor)
             contrast = ImageEnhance.Contrast(img)
             img = contrast.enhance(contrast_factor)
-            
+
         return img
 
     def preprocess_instance(self, superPixel, image):
@@ -113,8 +114,8 @@ class DataGenerator(Sequence):
         # img = np.clip(img - np.median(img)+127, 0, 255)
         superPixel = superPixel.astype(np.float32)
         # img = (img - np.min(img)) / (np.max(img) - np.min(img))
-        superPixel = superPixel/255.0
-        
+        superPixel = superPixel / 255.0
+
         w, h = image.size
         image = np.array(image)
         # Convert (H, W, C) to (W. H, C)
@@ -122,7 +123,7 @@ class DataGenerator(Sequence):
         # img = np.clip(img - np.median(img)+127, 0, 255)
         image = image.astype(np.float32)
         # img = (img - np.min(img)) / (np.max(img) - np.min(img))
-        image = image/255.0
+        image = image / 255.0
         return image, superPixel
 
     def elastic(self, image, alpha, sigma, random_state=None):
@@ -135,19 +136,16 @@ class DataGenerator(Sequence):
         if random_state is None:
             random_state = np.random.RandomState(None)
 
-
-        #print(random_state)
+        # print(random_state)
         shape = image.shape
         dx = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
         dy = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
         dz = np.zeros_like(dx)
 
-
         x, y, z = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]), np.arange(shape[2]))
 
-
-        indices = np.reshape(y+dy, (-1, 1)), np.reshape(x+dx, (-1, 1)), np.reshape(z, (-1, 1))
-        distored_image = map_coordinates(image, indices, order=1, mode='nearest')  #wrap,reflect, nearest
+        indices = np.reshape(y + dy, (-1, 1)), np.reshape(x + dx, (-1, 1)), np.reshape(z, (-1, 1))
+        distored_image = map_coordinates(image, indices, order=1, mode='nearest')  # wrap,reflect, nearest
 
         return distored_image.reshape(image.shape)
 
@@ -159,7 +157,7 @@ class DataGenerator(Sequence):
         # start = time.time()
         # Load the source image and its annotations
         img = self.load_image(index)
-        w, h  = img.size
+        w, h = img.size
 
         # Perform random augmentations
         if self.augment:
@@ -171,30 +169,30 @@ class DataGenerator(Sequence):
         pink_mass = enhancer.enhance(4.0)
         pink_mass = np.array(pink_mass)
         pink_mass = 255 - ((pink_mass[:, :, 0] > 150) * (pink_mass[:, :, 1] > 150) * (pink_mass[:, :, 2] > 150)) * 255
-        pink_mass = pink_mass/255
+        pink_mass = pink_mass / 255
         img = np.array(img)
-        img[:,:,0] = img[:,:,0]*pink_mass
-        img[:,:,1] = img[:,:,1]*pink_mass
-        img[:,:,2] = img[:,:,2]*pink_mass
-        element = cv2.getStructuringElement(cv2.MORPH_RECT, (10,10))
-        img = cv2.erode(img, element, iterations = 1)
-        img = cv2.dilate(img, element, iterations = 1)
+        img[:, :, 0] = img[:, :, 0] * pink_mass
+        img[:, :, 1] = img[:, :, 1] * pink_mass
+        img[:, :, 2] = img[:, :, 2] * pink_mass
+        element = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+        img = cv2.erode(img, element, iterations=1)
+        img = cv2.dilate(img, element, iterations=1)
         img = cv2.erode(img, element)
 
         # apply SLIC and extract (approximately) the supplied number of segments
-        segments = slic(real_image, n_segments = 500, sigma = 5)
+        segments = slic(real_image, n_segments=500, sigma=5)
 
         # Randomly uniformly sample superpixel clusters
         for i in range(500):
-            k = int(np.random.uniform(np.min(segments),np.max(segments)))
-            if np.sum(img[segments==k])>2000:
-                real_image[segments==k] = 0
+            k = int(np.random.uniform(np.min(segments), np.max(segments)))
+            if np.sum(img[segments == k]) > 2000:
+                real_image[segments == k] = 0
 
         real_image = self.elastic(real_image, 3500, 8, random_state=None)
 
         # Preprocess the image, masks and bboxes
         superPixel, real_image = self.preprocess_instance(Image.fromarray(superPixel), Image.fromarray(real_image))
-        
+
         # print("Aug and preprocess time = {:.5f}s".format(time.time() - start))
         # start = time.time()
 
@@ -206,7 +204,7 @@ class DataGenerator(Sequence):
         """
         # start = time.time()
 
-        batch_indices = [i for i in range(index*self.batch_size, (index+1)*self.batch_size)]
+        batch_indices = [i for i in range(index * self.batch_size, (index + 1) * self.batch_size)]
         batch_indices = [i % len(self.image_ids) for i in batch_indices]
         superPixel_imgs = []
         real_imgs = []
@@ -216,12 +214,11 @@ class DataGenerator(Sequence):
             # print("Instance time = {:.5f}s".format(time.time() - istart))
             superPixel_imgs.append(superpixel)
             real_imgs.append(image)
-        superPixel_imgs = np.array(superPixel_imgs)   # (B, w, h, 3)
-        real_imgs = np.array(real_imgs) # (B, M, w, h, 3)
+        superPixel_imgs = np.array(superPixel_imgs)  # (B, w, h, 3)
+        real_imgs = np.array(real_imgs)  # (B, M, w, h, 3)
 
         # print("Batch generation time = {:.5f}s".format(time.time() - start))
         return superPixel_imgs, real_imgs
-
 
     def __getitem__(self, index):
         return self.getitem(index)

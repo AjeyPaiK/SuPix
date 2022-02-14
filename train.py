@@ -1,13 +1,10 @@
-import os
-from dataloader import DataGenerator
+from datasets.pretraining_dataset import DataGenerator
 from model import attention_unet_refined
-import time
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.metrics import Precision, Recall, MeanIoU
-from tensorflow.keras.optimizers import Adam, Nadam, SGD
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, CSVLogger, TensorBoard
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, CSVLogger
 
 tf.random.set_seed(100)
 np.random.seed(100)
