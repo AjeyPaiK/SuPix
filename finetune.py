@@ -1,5 +1,5 @@
 from datasets.finetuning_dataset import DataGenerator
-from model import attention_unet_refined
+from models.attention_unet import attention_unet_refined
 
 import numpy as np
 import tensorflow as tf

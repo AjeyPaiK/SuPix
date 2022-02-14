@@ -5,7 +5,7 @@ from tqdm import tqdm
 import tensorflow as tf
 from tensorflow.keras.losses import mean_squared_error
 from datasets.pretraining_dataset import DataGenerator
-from model import attention_unet_refined
+from models.attention_unet import attention_unet_refined
 import os
 
 def display_recon():
