@@ -5,12 +5,10 @@ import random
 import cv2
 import numpy as np
 from skimage.segmentation import slic
-from scipy.ndimage.interpolation import map_coordinates
-from scipy.ndimage.filters import gaussian_filter
 
 
 class DataGenerator(Sequence):
-    def __init__(self, folder_path, image_size, batch_size=4, augment=True):
+    def __init__(self, folder_path, file_ids, image_size, batch_size=4, augment=True):
         """
         target classes can be a list from Good Crypts / Good Villi / Interpretable Region / Epithelium / Muscularis Mucosa
         mode should be one of 'seg', 'loc' or 'full'
@@ -19,8 +17,9 @@ class DataGenerator(Sequence):
         # Making the image ids list
         self.folder_path = folder_path
         self.image_size = image_size
-        image_paths = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]
-        self.image_ids = [f.replace('.jpg', '') for f in image_paths]
+        with open(file_ids) as f:
+            self.image_ids = f.readlines()
+            self.image_ids = [imgid.strip() for imgid in self.image_ids]
         self.batch_size = batch_size
         self.augment = augment
         print("Image count in {} path: {}".format(self.folder_path, len(self.image_ids)))
@@ -126,29 +125,6 @@ class DataGenerator(Sequence):
         image = image / 255.0
         return image, superPixel
 
-    def elastic(self, image, alpha, sigma, random_state=None):
-        """Elastic deformation of images as described in [Simard2003]_.
-            .. [Simard2003] Simard, Steinkraus and Platt, "Best Practices for
-               Convolutional Neural Networks applied to Visual Document Analysis", in
-               Proc. of the International Conference on Document Analysis and
-               Recognition, 2003.
-            """
-        if random_state is None:
-            random_state = np.random.RandomState(None)
-
-        # print(random_state)
-        shape = image.shape
-        dx = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
-        dy = gaussian_filter((random_state.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
-        dz = np.zeros_like(dx)
-
-        x, y, z = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]), np.arange(shape[2]))
-
-        indices = np.reshape(y + dy, (-1, 1)), np.reshape(x + dx, (-1, 1)), np.reshape(z, (-1, 1))
-        distored_image = map_coordinates(image, indices, order=1, mode='nearest')  # wrap,reflect, nearest
-
-        return distored_image.reshape(image.shape)
-
     def get_instance(self, index):
         """
         index is the index of the sample in the main array of indices
@@ -187,8 +163,6 @@ class DataGenerator(Sequence):
             k = int(np.random.uniform(np.min(segments), np.max(segments)))
             if np.sum(img[segments == k]) > 2000:
                 real_image[segments == k] = 0
-
-        real_image = self.elastic(real_image, 3500, 8, random_state=None)
 
         # Preprocess the image, masks and bboxes
         superPixel, real_image = self.preprocess_instance(Image.fromarray(superPixel), Image.fromarray(real_image))

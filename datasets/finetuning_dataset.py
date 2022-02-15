@@ -5,7 +5,7 @@ import time
 
 from PIL import ImageEnhance, ImageFilter
 from tensorflow.keras.utils import Sequence
-from utils import *
+from utilities.utils import *
 
 # NOTE: IMAGE CONVENTION IS (W, H, C)
 
@@ -22,7 +22,9 @@ class DataGenerator(Sequence):
         print("Initialising data generator")
         # Making the image ids list
         self.root = data_root
-        self.image_ids = file_ids
+        with open(file_ids) as file:
+            self.image_ids = file.readlines()
+            self.image_ids = [imgid.strip() for imgid in self.image_ids]
         self.orig_image_ids = self.image_ids.copy()
         self.image_size = image_size
         self.overload = overload
@@ -60,7 +62,7 @@ class DataGenerator(Sequence):
         if self.overload and not force_load:
             img, w, h, w_img, h_img = self.images[self.image_ids[index]]
         else:
-            image_path = os.path.join(self.root, 'Images', self.image_ids[index] + '.jpg')
+            image_path = os.path.join(self.root, self.image_ids[index] + '.jpg')
             img = Image.open(image_path).convert('RGB')
             w_img, h_img = img.size
             # w, h = img.size
@@ -79,7 +81,7 @@ class DataGenerator(Sequence):
         if self.overload and not force_load:
             labels = self.annotations[self.image_ids[index]].copy()
         else:
-            with open(os.path.join(self.root, 'Annotations', self.image_ids[index] + '.json')) as anns_file:
+            with open(os.path.join(self.root.replace("Images", "Annotations"), self.image_ids[index] + '.json')) as anns_file:
                 labels = json.load(anns_file)
                 labels = labels["shapes"]
         return labels
