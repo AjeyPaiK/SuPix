@@ -9,12 +9,13 @@ from utilities.utils import SSIMLoss
 
 tf.random.set_seed(100)
 np.random.seed(100)
-model_path = '/content/drive/My Drive/SupPix/supPix_pretrain.h5'  # Saving location
-log_path = '/content/drive/My Drive/SupPix/supPix_pretrain.csv'
+SCRATCH = "/processing/a.karkala/supix"
+model_path = './checkpoints/supPix_pretrain.h5'  # Saving location
+log_path = './checkpoints/supPix_pretrain.csv'
 weights_paths = None
-images_folder = "/content/drive/My Drive/Data/Images"
-unlabelled_image_list = "/content/drive/MyDrive/Data/Lists/unlabelled.txt"
-valid_image_list = "/content/drive/MyDrive/Data/Lists/valid40.txt"
+images_folder = SCRATCH+"/Data/Images"
+unlabelled_image_list = SCRATCH+"/Data/Lists/unlabelled.txt"
+valid_image_list = SCRATCH+"/Data/Lists/valid40.txt"
 
 ## Parameters
 image_size = (320, 256)  # Original = (2448, 1920)
