@@ -10,8 +10,8 @@ from utilities.utils import SSIMLoss
 tf.random.set_seed(100)
 np.random.seed(100)
 SCRATCH = "/processing/a.karkala/supix"
-model_path = './checkpoints/supPix_pretrain.h5'  # Saving location
-log_path = './checkpoints/supPix_pretrain.csv'
+model_path = './checkpoints/supPix_pretrain_elastic.h5'  # Saving location
+log_path = './checkpoints/supPix_pretrain_elastic.csv'
 weights_paths = None
 images_folder = SCRATCH+"/Data/Images"
 unlabelled_image_list = SCRATCH+"/Data/Lists/unlabelled.txt"
