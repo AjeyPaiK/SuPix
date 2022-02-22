@@ -10,9 +10,9 @@ from utilities.utils import SSIMLoss
 tf.random.set_seed(100)
 np.random.seed(100)
 SCRATCH = "/processing/a.karkala/supix"
-model_path = './checkpoints/supPix_pretrain.h5'  # Saving location
-log_path = './checkpoints/supPix_pretrain.csv'
-weights_paths = None
+model_path = './checkpoints/supPix_pretrain_elastic_continued_from41.h5'  # Saving location
+log_path = './checkpoints/supPix_pretrain_elastic_continued_from41.csv'
+weights_paths = ['./checkpoints/supPix_pretrain_elastic.h5']
 images_folder = SCRATCH+"/Data/Images"
 unlabelled_image_list = SCRATCH+"/Data/Lists/unlabelled.txt"
 valid_image_list = SCRATCH+"/Data/Lists/valid40.txt"
@@ -25,7 +25,7 @@ epochs = 500
 
 
 model = attention_unet_refined(input_shape=image_size, mask_channels=3, out_channels=3,
-                               multiplier=5, freeze_segmentor=False, dropout_rate=0.0)
+                               multiplier=10, freeze_segmentor=False, dropout_rate=0.0)
 
 optimizer = Adam(learning_rate=lr)
 model.compile(loss=SSIMLoss, optimizer=optimizer, metrics='mse')
@@ -54,5 +54,5 @@ model.fit(x=train_generator, steps_per_epoch=train_generator.__len__(),
           validation_data=valid_generator,
           validation_steps=valid_generator.__len__(),
           validation_freq=5,
-          workers=4,
-          initial_epoch=0)
+          workers=16,
+          initial_epoch=41)
