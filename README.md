@@ -3,5 +3,3 @@ A self-supervised representation learning model for biopsy images of the human d
 
 Visualization of representation learning:
 ![](images/super_pixel_morphology.png)
-
-The left-most image is the masked and deformed input. In the middle, is the image reconstructed by the model learning representations. Right-most image is the real image.
